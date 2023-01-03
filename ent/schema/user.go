@@ -26,7 +26,10 @@ func (User) Fields() []ent.Field {
 		}),
 		field.String("email").Unique().Validate(func(s string) error {
 			_, err := mail.ParseAddress(s)
-			return err
+			if err != nil {
+				return errors.New("invalid email")
+			}
+			return nil
 		}),
 		field.Enum("role").Values("admin", "employee"),
 	}
