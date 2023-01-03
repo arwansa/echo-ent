@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/arwansa/echo-ent/ent"
@@ -26,51 +27,60 @@ func NewUserHandler(e *echo.Echo, userUc usecase.UserUsecase) {
 func (h *userHandler) Create(c echo.Context) error {
 	defer c.Request().Body.Close()
 
-	newUser := ent.User{}
-	err := json.NewDecoder(c.Request().Body).Decode(&newUser)
+	user := ent.User{}
+	err := json.NewDecoder(c.Request().Body).Decode(&user)
 	if err != nil {
-		return utils.ErrorResponse(c, false, http.StatusBadRequest, err)
+		return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
 	}
 
-	result, err := h.userUc.Create(newUser.Name, newUser.Email, newUser.Role.String())
+	result, err := h.userUc.Create(user.Name, user.Email, user.Role.String())
 	if err != nil {
-		return utils.ErrorResponse(c, false, http.StatusBadRequest, err)
+		return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
 	}
 
-	return utils.SuccessResponse(c, true, http.StatusCreated, result)
+	return utils.ReturnResponse(c, http.StatusCreated, nil, result)
 }
 
 func (h *userHandler) GetById(c echo.Context) error {
 	result, err := h.userUc.GetById(c.Param("id"))
 	if err != nil {
-		return utils.ErrorResponse(c, false, http.StatusNotFound, err)
+		if errors.Is(err, usecase.ErrInvalidUserId) {
+			return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
+		}
+		return utils.ReturnResponse(c, http.StatusNotFound, err, nil)
 	}
 
-	return utils.SuccessResponse(c, true, http.StatusOK, result)
+	return utils.ReturnResponse(c, http.StatusOK, nil, result)
 }
 
 func (h *userHandler) UpdateById(c echo.Context) error {
 	defer c.Request().Body.Close()
 
-	newUser := ent.User{}
-	err := json.NewDecoder(c.Request().Body).Decode(&newUser)
+	user := ent.User{}
+	err := json.NewDecoder(c.Request().Body).Decode(&user)
 	if err != nil {
-		return utils.ErrorResponse(c, false, http.StatusBadRequest, err)
+		return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
 	}
 
-	result, err := h.userUc.UpdateById(c.Param("id"), newUser.Name, newUser.Email, newUser.Role.String())
+	result, err := h.userUc.UpdateById(c.Param("id"), user.Name, user.Email, user.Role.String())
 	if err != nil {
-		return utils.ErrorResponse(c, false, http.StatusBadRequest, err)
+		if errors.Is(err, usecase.ErrInvalidUserId) {
+			return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
+		}
+		return utils.ReturnResponse(c, http.StatusNotFound, err, nil)
 	}
 
-	return utils.SuccessResponse(c, true, http.StatusOK, result)
+	return utils.ReturnResponse(c, http.StatusOK, nil, result)
 }
 
 func (h *userHandler) DeleteById(c echo.Context) error {
 	err := h.userUc.DeleteById(c.Param("id"))
 	if err != nil {
-		return utils.ErrorResponse(c, false, http.StatusBadRequest, err)
+		if errors.Is(err, usecase.ErrInvalidUserId) {
+			return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
+		}
+		return utils.ReturnResponse(c, http.StatusNotFound, err, nil)
 	}
 
-	return utils.SuccessResponse(c, true, http.StatusOK, nil)
+	return utils.ReturnResponse(c, http.StatusOK, nil, nil)
 }

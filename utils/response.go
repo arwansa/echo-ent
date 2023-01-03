@@ -2,32 +2,22 @@ package utils
 
 import "github.com/labstack/echo"
 
-type successResponse struct {
+type response struct {
 	Status bool        `json:"status"`
 	Code   int         `json:"code"`
-	Data   interface{} `json:"data"`
+	Error  string      `json:"error,omitempty"`
+	Data   interface{} `json:"data,omitempty"`
 }
 
-type errorResponse struct {
-	Status bool   `json:"status"`
-	Code   int    `json:"code"`
-	Error  string `json:"error"`
-}
-
-func SuccessResponse(c echo.Context, status bool, code int, data interface{}) error {
-	response := successResponse{
-		Status: status,
+func ReturnResponse(c echo.Context, code int, err error, data interface{}) error {
+	response := response{
+		Status: true,
 		Code:   code,
 		Data:   data,
 	}
-	return c.JSON(code, response)
-}
-
-func ErrorResponse(c echo.Context, status bool, code int, err error) error {
-	response := errorResponse{
-		Status: status,
-		Code:   code,
-		Error:  err.Error(),
+	if err != nil {
+		response.Status = false
+		response.Error = err.Error()
 	}
 	return c.JSON(code, response)
 }

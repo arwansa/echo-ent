@@ -9,6 +9,8 @@ import (
 	"github.com/arwansa/echo-ent/repository"
 )
 
+var ErrInvalidUserId = errors.New("invalid user id")
+
 type UserUsecase interface {
 	Create(name, email, role string) (*ent.User, error)
 	GetById(userId string) (*ent.User, error)
@@ -32,17 +34,17 @@ func (u *userUsecase) Create(name, email, role string) (*ent.User, error) {
 func (u *userUsecase) GetById(userId string) (*ent.User, error) {
 	id, err := strconv.Atoi(userId)
 	if err != nil {
-		return nil, errors.New("invalid id")
+		return nil, ErrInvalidUserId
 	}
 
 	result, err := u.userRepo.GetById(id)
 	return result, err
 }
 
-func (u *userUsecase) UpdateById(userId string, name, email, role string) (*ent.User, error) {
+func (u *userUsecase) UpdateById(userId, name, email, role string) (*ent.User, error) {
 	id, err := strconv.Atoi(userId)
 	if err != nil {
-		return nil, errors.New("invalid id")
+		return nil, ErrInvalidUserId
 	}
 
 	result, err := u.userRepo.UpdateById(id, name, email, getUserRole(role))
@@ -52,7 +54,7 @@ func (u *userUsecase) UpdateById(userId string, name, email, role string) (*ent.
 func (u *userUsecase) DeleteById(userId string) error {
 	id, err := strconv.Atoi(userId)
 	if err != nil {
-		return errors.New("invalid id")
+		return ErrInvalidUserId
 	}
 
 	err = u.userRepo.DeleteById(id)
