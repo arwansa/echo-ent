@@ -29,19 +29,13 @@ func (r *userRepository) Create(name, email string, role user.Role) (*ent.User, 
 		SetEmail(email).
 		SetRole(role).
 		Save(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	return result, err
 }
 
 func (r *userRepository) GetById(userId int) (*ent.User, error) {
 	result, err := r.client.User.
 		Get(context.Background(), userId)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	return result, err
 }
 
 func (r *userRepository) UpdateById(userId int, name, email string, role user.Role) (*ent.User, error) {
@@ -51,18 +45,12 @@ func (r *userRepository) UpdateById(userId int, name, email string, role user.Ro
 		SetEmail(email).
 		SetRole(role).
 		Save(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	return result, err
 }
 
 func (r *userRepository) DeleteById(userId int) error {
 	err := r.client.User.
 		DeleteOneID(userId).
 		Exec(context.Background())
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

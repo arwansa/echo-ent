@@ -26,11 +26,7 @@ func NewUserUsecase(repo repository.UserRepository) UserUsecase {
 
 func (u *userUsecase) Create(name, email, role string) (*ent.User, error) {
 	result, err := u.userRepo.Create(name, email, getUserRole(role))
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return result, err
 }
 
 func (u *userUsecase) GetById(userId string) (*ent.User, error) {
@@ -40,10 +36,7 @@ func (u *userUsecase) GetById(userId string) (*ent.User, error) {
 	}
 
 	result, err := u.userRepo.GetById(id)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	return result, err
 }
 
 func (u *userUsecase) UpdateById(userId string, name, email, role string) (*ent.User, error) {
@@ -53,10 +46,7 @@ func (u *userUsecase) UpdateById(userId string, name, email, role string) (*ent.
 	}
 
 	result, err := u.userRepo.UpdateById(id, name, email, getUserRole(role))
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
+	return result, err
 }
 
 func (u *userUsecase) DeleteById(userId string) error {
@@ -66,10 +56,7 @@ func (u *userUsecase) DeleteById(userId string) error {
 	}
 
 	err = u.userRepo.DeleteById(id)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func getUserRole(role string) user.Role {
