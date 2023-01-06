@@ -2,8 +2,8 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/arwansa/echo-ent/ent"
 	"github.com/arwansa/echo-ent/usecase"
@@ -35,19 +35,22 @@ func (h *userHandler) Create(c echo.Context) error {
 
 	result, err := h.userUc.Create(user.Name, user.Email, user.Role.String())
 	if err != nil {
-		return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
+		return utils.ReturnResponse(c, getStatusCode(err), err, result)
 	}
 
 	return utils.ReturnResponse(c, http.StatusCreated, nil, result)
 }
 
 func (h *userHandler) GetById(c echo.Context) error {
-	result, err := h.userUc.GetById(c.Param("id"))
+	userId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		if errors.Is(err, usecase.ErrInvalidUserId) {
-			return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
-		}
-		return utils.ReturnResponse(c, http.StatusNotFound, err, nil)
+		return utils.ReturnResponse(c, http.StatusNotFound, usecase.ErrNotFound, nil)
+
+	}
+
+	result, err := h.userUc.GetById(userId)
+	if err != nil {
+		return utils.ReturnResponse(c, getStatusCode(err), err, nil)
 	}
 
 	return utils.ReturnResponse(c, http.StatusOK, nil, result)
@@ -55,32 +58,52 @@ func (h *userHandler) GetById(c echo.Context) error {
 
 func (h *userHandler) UpdateById(c echo.Context) error {
 	defer c.Request().Body.Close()
+	userId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return utils.ReturnResponse(c, http.StatusNotFound, usecase.ErrNotFound, nil)
+
+	}
 
 	user := ent.User{}
-	err := json.NewDecoder(c.Request().Body).Decode(&user)
+	err = json.NewDecoder(c.Request().Body).Decode(&user)
 	if err != nil {
 		return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
 	}
 
-	result, err := h.userUc.UpdateById(c.Param("id"), user.Name, user.Email, user.Role.String())
+	result, err := h.userUc.UpdateById(userId, user.Name, user.Email, user.Role.String())
 	if err != nil {
-		if errors.Is(err, usecase.ErrInvalidUserId) {
-			return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
-		}
-		return utils.ReturnResponse(c, http.StatusNotFound, err, nil)
+		return utils.ReturnResponse(c, getStatusCode(err), err, nil)
 	}
 
 	return utils.ReturnResponse(c, http.StatusOK, nil, result)
 }
 
 func (h *userHandler) DeleteById(c echo.Context) error {
-	err := h.userUc.DeleteById(c.Param("id"))
+	userId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		if errors.Is(err, usecase.ErrInvalidUserId) {
-			return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
-		}
-		return utils.ReturnResponse(c, http.StatusNotFound, err, nil)
+		return utils.ReturnResponse(c, http.StatusNotFound, usecase.ErrNotFound, nil)
+
+	}
+
+	err = h.userUc.DeleteById(userId)
+	if err != nil {
+		return utils.ReturnResponse(c, getStatusCode(err), err, nil)
 	}
 
 	return utils.ReturnResponse(c, http.StatusOK, nil, nil)
+}
+
+func getStatusCode(err error) int {
+	switch {
+	case err == nil:
+		return http.StatusOK
+	case ent.IsValidationError(err):
+		return http.StatusUnprocessableEntity
+	case ent.IsNotFound(err):
+		return http.StatusNotFound
+	case ent.IsConstraintError(err):
+		return http.StatusConflict
+	default:
+		return http.StatusInternalServerError
+	}
 }

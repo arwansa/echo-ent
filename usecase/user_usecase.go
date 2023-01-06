@@ -1,21 +1,16 @@
 package usecase
 
 import (
-	"errors"
-	"strconv"
-
 	"github.com/arwansa/echo-ent/ent"
 	"github.com/arwansa/echo-ent/ent/user"
 	"github.com/arwansa/echo-ent/repository"
 )
 
-var ErrInvalidUserId = errors.New("invalid user id")
-
 type UserUsecase interface {
 	Create(name, email, role string) (*ent.User, error)
-	GetById(userId string) (*ent.User, error)
-	UpdateById(userId string, name, email, role string) (*ent.User, error)
-	DeleteById(userId string) error
+	GetById(userId int) (*ent.User, error)
+	UpdateById(userId int, name, email, role string) (*ent.User, error)
+	DeleteById(userId int) error
 }
 
 type userUsecase struct {
@@ -31,33 +26,18 @@ func (u *userUsecase) Create(name, email, role string) (*ent.User, error) {
 	return result, err
 }
 
-func (u *userUsecase) GetById(userId string) (*ent.User, error) {
-	id, err := strconv.Atoi(userId)
-	if err != nil {
-		return nil, ErrInvalidUserId
-	}
-
-	result, err := u.userRepo.GetById(id)
+func (u *userUsecase) GetById(userId int) (*ent.User, error) {
+	result, err := u.userRepo.GetById(userId)
 	return result, err
 }
 
-func (u *userUsecase) UpdateById(userId, name, email, role string) (*ent.User, error) {
-	id, err := strconv.Atoi(userId)
-	if err != nil {
-		return nil, ErrInvalidUserId
-	}
-
-	result, err := u.userRepo.UpdateById(id, name, email, getUserRole(role))
+func (u *userUsecase) UpdateById(userId int, name, email, role string) (*ent.User, error) {
+	result, err := u.userRepo.UpdateById(userId, name, email, getUserRole(role))
 	return result, err
 }
 
-func (u *userUsecase) DeleteById(userId string) error {
-	id, err := strconv.Atoi(userId)
-	if err != nil {
-		return ErrInvalidUserId
-	}
-
-	err = u.userRepo.DeleteById(id)
+func (u *userUsecase) DeleteById(userId int) error {
+	err := u.userRepo.DeleteById(userId)
 	return err
 }
 
