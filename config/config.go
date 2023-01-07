@@ -11,7 +11,6 @@ type Config struct {
 		User      string `envconfig:"DB_USER"`
 		Pass      string `envconfig:"DB_PASS"`
 		Name      string `envconfig:"DB_NAME"`
-		ConnLimit int    `envconfig:"DB_CONN_LIMIT"`
 	}
 	Server struct {
 		RESTPort string `envconfig:"REST_PORT"`

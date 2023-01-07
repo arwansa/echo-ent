@@ -33,7 +33,8 @@ func (h *userHandler) Create(c echo.Context) error {
 		return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
 	}
 
-	result, err := h.userUc.Create(user.Name, user.Email, user.Role.String())
+	ctx := c.Request().Context()
+	result, err := h.userUc.Create(ctx, user.Name, user.Email, user.Role.String())
 	if err != nil {
 		return utils.ReturnResponse(c, getStatusCode(err), err, result)
 	}
@@ -48,7 +49,8 @@ func (h *userHandler) GetById(c echo.Context) error {
 
 	}
 
-	result, err := h.userUc.GetById(userId)
+	ctx := c.Request().Context()
+	result, err := h.userUc.GetById(ctx, userId)
 	if err != nil {
 		return utils.ReturnResponse(c, getStatusCode(err), err, nil)
 	}
@@ -70,7 +72,8 @@ func (h *userHandler) UpdateById(c echo.Context) error {
 		return utils.ReturnResponse(c, http.StatusBadRequest, err, nil)
 	}
 
-	result, err := h.userUc.UpdateById(userId, user.Name, user.Email, user.Role.String())
+	ctx := c.Request().Context()
+	result, err := h.userUc.UpdateById(ctx, userId, user.Name, user.Email, user.Role.String())
 	if err != nil {
 		return utils.ReturnResponse(c, getStatusCode(err), err, nil)
 	}
@@ -85,7 +88,8 @@ func (h *userHandler) DeleteById(c echo.Context) error {
 
 	}
 
-	err = h.userUc.DeleteById(userId)
+	ctx := c.Request().Context()
+	err = h.userUc.DeleteById(ctx, userId)
 	if err != nil {
 		return utils.ReturnResponse(c, getStatusCode(err), err, nil)
 	}

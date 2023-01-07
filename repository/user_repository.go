@@ -8,10 +8,10 @@ import (
 )
 
 type UserRepository interface {
-	Create(name, email string, role user.Role) (*ent.User, error)
-	GetById(userId int) (*ent.User, error)
-	UpdateById(userId int, name, email string, role user.Role) (*ent.User, error)
-	DeleteById(userId int) error
+	Create(ctx context.Context, name, email string, role user.Role) (*ent.User, error)
+	GetById(ctx context.Context, userId int) (*ent.User, error)
+	UpdateById(ctx context.Context, userId int, name, email string, role user.Role) (*ent.User, error)
+	DeleteById(ctx context.Context, userId int) error
 }
 
 type userRepository struct {
@@ -22,7 +22,7 @@ func NewUserRepository(client *ent.Client) UserRepository {
 	return &userRepository{client: client}
 }
 
-func (r *userRepository) Create(name, email string, role user.Role) (*ent.User, error) {
+func (r *userRepository) Create(ctx context.Context, name, email string, role user.Role) (*ent.User, error) {
 	result, err := r.client.User.
 		Create().
 		SetName(name).
@@ -32,13 +32,13 @@ func (r *userRepository) Create(name, email string, role user.Role) (*ent.User, 
 	return result, err
 }
 
-func (r *userRepository) GetById(userId int) (*ent.User, error) {
+func (r *userRepository) GetById(ctx context.Context, userId int) (*ent.User, error) {
 	result, err := r.client.User.
 		Get(context.Background(), userId)
 	return result, err
 }
 
-func (r *userRepository) UpdateById(userId int, name, email string, role user.Role) (*ent.User, error) {
+func (r *userRepository) UpdateById(ctx context.Context, userId int, name, email string, role user.Role) (*ent.User, error) {
 	result, err := r.client.User.
 		UpdateOneID(userId).
 		SetName(name).
@@ -48,7 +48,7 @@ func (r *userRepository) UpdateById(userId int, name, email string, role user.Ro
 	return result, err
 }
 
-func (r *userRepository) DeleteById(userId int) error {
+func (r *userRepository) DeleteById(ctx context.Context, userId int) error {
 	err := r.client.User.
 		DeleteOneID(userId).
 		Exec(context.Background())
