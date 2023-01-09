@@ -36,7 +36,7 @@ func (h *userHandler) Create(c echo.Context) error {
 	ctx := c.Request().Context()
 	result, err := h.userUc.Create(ctx, user.Name, user.Email, user.Role.String())
 	if err != nil {
-		return utils.ReturnResponse(c, getStatusCode(err), err, result)
+		return utils.ReturnResponse(c, getStatusCode(err), err, nil)
 	}
 
 	return utils.ReturnResponse(c, http.StatusCreated, nil, result)
