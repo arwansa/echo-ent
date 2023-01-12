@@ -28,13 +28,13 @@ func (r *userRepository) Create(ctx context.Context, name, email string, role us
 		SetName(name).
 		SetEmail(email).
 		SetRole(role).
-		Save(context.Background())
+		Save(ctx)
 	return result, err
 }
 
 func (r *userRepository) GetById(ctx context.Context, userId int) (*ent.User, error) {
 	result, err := r.client.User.
-		Get(context.Background(), userId)
+		Get(ctx, userId)
 	return result, err
 }
 
@@ -44,13 +44,13 @@ func (r *userRepository) UpdateById(ctx context.Context, userId int, name, email
 		SetName(name).
 		SetEmail(email).
 		SetRole(role).
-		Save(context.Background())
+		Save(ctx)
 	return result, err
 }
 
 func (r *userRepository) DeleteById(ctx context.Context, userId int) error {
 	err := r.client.User.
 		DeleteOneID(userId).
-		Exec(context.Background())
+		Exec(ctx)
 	return err
 }
